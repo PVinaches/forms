@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.6.0...@kaoto/forms@1.7.0) (2026-03-17)
+
+### Features
+
+* **Suggestions:** Add lightbulb button and double-click to open suggestions menu ([27ac459](https://github.com/KaotoIO/forms/commit/27ac459f6a363474dcfa674a7f652a28e967cc64))
+* **Suggestions:** Centralize suggestion menu state in SuggestionContext ([81f1b42](https://github.com/KaotoIO/forms/commit/81f1b42b370c3fd577dcd6e8e0134d0a3f57bc31))
+
 # [1.6.0](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.5.9...@kaoto/forms@1.6.0) (2026-02-11)
 
 ### Bug Fixes
