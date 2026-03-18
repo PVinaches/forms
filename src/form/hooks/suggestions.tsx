@@ -61,8 +61,7 @@ export const useSuggestions = ({
         setSearchValue('');
         setCurrentOpenMenu(menuId);
         requestAnimationFrame(() => {
-          firstElementRef.current?.focus();
-          firstElementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          searchInputRef.current?.focus();
         });
       } else if (event.key === 'Escape') {
         onEscapeKey(event);
@@ -160,8 +159,7 @@ export const useSuggestions = ({
       const newValue = prev === menuId ? null : menuId;
       if (newValue) {
         requestAnimationFrame(() => {
-          firstElementRef.current?.focus();
-          firstElementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          searchInputRef.current?.focus();
         });
       }
       return newValue;
