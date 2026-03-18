@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.1](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.7.0...@kaoto/forms@1.7.1) (2026-03-18)
+
+### Bug Fixes
+
+* **Suggestions:** Focus search input when opening suggestions menu ([7d821f1](https://github.com/KaotoIO/forms/commit/7d821f18aa5405274a8b9a9d4cc1c04d37a3c3f9))
+
 # [1.7.0](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.6.0...@kaoto/forms@1.7.0) (2026-03-17)
 
 ### Features
