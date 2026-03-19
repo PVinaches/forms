@@ -1,18 +1,40 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { ReactNode, useState } from 'react';
 import { ModelContextProvider } from '../providers/ModelProvider';
 import { SchemaProvider } from '../providers/SchemaProvider';
+import { SuggestionContext } from '../providers/SuggestionRegistryProvider';
 import { ROOT_PATH } from '../utils';
 import { TextAreaField } from './TextAreaField';
 
-// Mock useSuggestions to control its output
-jest.mock('../hooks/suggestions', () => ({
-  useSuggestions: jest.fn(() => ({
-    suggestionsMenu: null,
-    openSuggestions: jest.fn(),
-  })),
-}));
+const StatefulSuggestionProvider = ({ children, getProviders }: { children: ReactNode; getProviders: jest.Mock }) => {
+  const [currentOpenMenu, setCurrentOpenMenu] = useState<string | null>(null);
+  return (
+    <SuggestionContext.Provider value={{ getProviders, currentOpenMenu, setCurrentOpenMenu }}>
+      {children}
+    </SuggestionContext.Provider>
+  );
+};
 
 describe('TextAreaField', () => {
+  const mockSuggestionProvider = {
+    id: 'test-provider',
+    appliesTo: jest.fn().mockReturnValue(true),
+    getSuggestions: jest.fn().mockResolvedValue([
+      { value: 'test-suggestion-1', description: 'First test suggestion' },
+      { value: 'test-suggestion-2', description: 'Second test suggestion' },
+    ]),
+  };
+
+  const getProvidersMock = jest.fn().mockReturnValue([mockSuggestionProvider]);
+
+  const renderWithSuggestions = (children: React.ReactNode) => {
+    return render(<StatefulSuggestionProvider getProviders={getProvidersMock}>{children}</StatefulSuggestionProvider>);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render', () => {
     const { container } = render(
       <ModelContextProvider model="Value" onPropertyChange={jest.fn()}>
@@ -127,28 +149,25 @@ describe('TextAreaField', () => {
   });
 
   it('shows suggestions when Ctrl+Space is pressed', async () => {
-    const SuggestionsMenu = () => <div data-testid="suggestions-menu">Suggestions</div>;
-    const { useSuggestions } = jest.requireMock('../hooks/suggestions');
+    const onPropertyChangeSpy = jest.fn();
 
-    useSuggestions.mockImplementation(() => ({
-      suggestionsMenu: <SuggestionsMenu />,
-      openSuggestions: jest.fn(),
-    }));
-
-    const { getByRole, getByTestId } = render(
-      <ModelContextProvider model="Value" onPropertyChange={jest.fn()}>
+    const wrapper = renderWithSuggestions(
+      <ModelContextProvider model="" onPropertyChange={onPropertyChangeSpy}>
         <TextAreaField propName={ROOT_PATH} />
       </ModelContextProvider>,
     );
-    const input = getByRole('textbox');
 
     await act(async () => {
+      const input = wrapper.getByRole('textbox');
       input.focus();
       fireEvent.keyDown(input, { code: 'Space', ctrlKey: true });
     });
 
     await waitFor(() => {
-      expect(getByTestId('suggestions-menu')).toBeInTheDocument();
+      expect(wrapper.getByTestId('suggestions-menu')).toBeInTheDocument();
     });
+
+    expect(wrapper.getByRole('menuitem', { name: 'test-suggestion-1' })).toBeInTheDocument();
+    expect(wrapper.getByRole('menuitem', { name: 'test-suggestion-2' })).toBeInTheDocument();
   });
 });

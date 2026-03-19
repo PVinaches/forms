@@ -85,7 +85,7 @@ export const StringField: FunctionComponent<StringFieldProps> = ({
     [onFieldChange],
   );
 
-  const { suggestionsMenu } = useSuggestions({
+  const { suggestionsMenu, openSuggestions } = useSuggestions({
     propName,
     schema,
     inputRef,
@@ -105,6 +105,7 @@ export const StringField: FunctionComponent<StringFieldProps> = ({
       defaultValue={schema.default?.toString()}
       errors={errors}
       isRaw={isRaw}
+      onOpenSuggestions={openSuggestions}
     >
       <div className="string-field-container">
         <div className="string-field-input-wrapper">

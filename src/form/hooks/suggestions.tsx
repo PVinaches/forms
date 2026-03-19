@@ -179,11 +179,14 @@ export const useSuggestions = ({
   );
 
   const openSuggestions = useCallback(() => {
+    const input = inputRef.current;
+    if (input?.disabled || input?.readOnly) return;
+
     setSearchValue('');
     setCurrentOpenMenu((prev) => (prev === menuId ? null : menuId));
-  }, [menuId, setCurrentOpenMenu]);
+  }, [menuId, setCurrentOpenMenu, inputRef]);
 
-  /** Register keyboard bindings */
+  /** Register keyboard bindings and double-click handler */
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
@@ -197,6 +200,7 @@ export const useSuggestions = ({
 
     input.addEventListener('focus', handleFocus);
     input.addEventListener('blur', handleBlur);
+    input.addEventListener('dblclick', openSuggestions);
 
     // If already focused, register immediately
     if (document.activeElement === input) {
@@ -207,8 +211,9 @@ export const useSuggestions = ({
       input.removeEventListener('focus', handleFocus);
       input.removeEventListener('blur', handleBlur);
       input.removeEventListener('keydown', handleInputKeyDown);
+      input.removeEventListener('dblclick', openSuggestions);
     };
-  }, [handleInputKeyDown, inputRef]);
+  }, [handleInputKeyDown, inputRef, openSuggestions]);
 
   useEffect(() => {
     if (!isVisible || !inputRef.current) return;
@@ -221,20 +226,13 @@ export const useSuggestions = ({
       left: rect.left + window.scrollX,
     });
 
-    requestAnimationFrame(() => {
+    /** Use setTimeout to ensure focus happens after Carbon Menu's initialization */
+    const focusTimeout = setTimeout(() => {
       searchInputRef.current?.focus();
-    });
-  }, [isVisible, inputRef]);
+    }, 100);
 
-  useEffect(() => {
-    if (!isVisible) return;
-
-    requestAnimationFrame(() => {
-      if (document.activeElement !== searchInputRef.current) {
-        searchInputRef.current?.focus();
-      }
-    });
-  }, [isVisible, groupedSuggestions]);
+    return () => clearTimeout(focusTimeout);
+  }, [isVisible, inputRef, groupedSuggestions]);
 
   const suggestionsMenu = isVisible ? (
     <Layer level={1}>

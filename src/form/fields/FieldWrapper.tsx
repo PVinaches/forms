@@ -1,5 +1,5 @@
-import { Stack, Toggletip, ToggletipButton, ToggletipContent, Tag } from '@carbon/react';
-import { Information, WarningFilled } from '@carbon/icons-react';
+import { IconButton, Stack, Toggletip, ToggletipButton, ToggletipContent, Tag } from '@carbon/react';
+import { Idea, Information, WarningFilled } from '@carbon/icons-react';
 import { FunctionComponent, PropsWithChildren, ReactNode } from 'react';
 import { FieldProps } from '../models/typings';
 import clsx from 'clsx';
@@ -13,6 +13,7 @@ interface FieldWrapperProps extends FieldProps {
   errors?: string[];
   isRow?: boolean;
   isRaw?: boolean;
+  onOpenSuggestions?: () => void;
 }
 
 export const FieldWrapper: FunctionComponent<PropsWithChildren<FieldWrapperProps>> = ({
@@ -26,6 +27,7 @@ export const FieldWrapper: FunctionComponent<PropsWithChildren<FieldWrapperProps
   isRow = false,
   children,
   isRaw = false,
+  onOpenSuggestions,
 }) => {
   const id = `${propName}-popover`;
   const label = title ?? propName.split('.').pop();
@@ -52,6 +54,11 @@ export const FieldWrapper: FunctionComponent<PropsWithChildren<FieldWrapperProps
             <p>Default: {defaultValue}</p>
           </ToggletipContent>
         </Toggletip>
+        {onOpenSuggestions && (
+          <IconButton kind="ghost" size="sm" label="Open suggestions (Ctrl+Space)" onClick={onOpenSuggestions} data-testid={`${propName}__open-suggestions-button`}>
+            <Idea />
+          </IconButton>
+        )}
       </div>
 
       {children}

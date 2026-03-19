@@ -40,7 +40,7 @@ export const TextAreaField: FunctionComponent<FieldProps> = ({ propName, require
     onChange(newValue);
   };
 
-  const { suggestionsMenu } = useSuggestions({
+  const { suggestionsMenu, openSuggestions } = useSuggestions({
     propName,
     schema,
     inputRef: textAreaRef,
@@ -60,6 +60,7 @@ export const TextAreaField: FunctionComponent<FieldProps> = ({ propName, require
       defaultValue={schema.default?.toString()}
       errors={errors}
       isRaw={isRaw}
+      onOpenSuggestions={openSuggestions}
     >
       <div className="textarea-field-container">
         <div className="textarea-field-input-wrapper">

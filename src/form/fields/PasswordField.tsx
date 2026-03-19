@@ -57,7 +57,7 @@ export const PasswordField: FunctionComponent<FieldProps> = ({ propName, require
     [onFieldChange],
   );
 
-  const { suggestionsMenu } = useSuggestions({
+  const { suggestionsMenu, openSuggestions } = useSuggestions({
     propName,
     schema,
     inputRef,
@@ -77,6 +77,7 @@ export const PasswordField: FunctionComponent<FieldProps> = ({ propName, require
       defaultValue={schema.default?.toString()}
       errors={errors}
       isRaw={isRaw}
+      onOpenSuggestions={openSuggestions}
     >
       <div className="password-field-container">
         <div className="password-field-input-wrapper">

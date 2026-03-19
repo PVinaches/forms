@@ -1,15 +1,29 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { ReactNode, useState } from 'react';
+import { SuggestionContext } from '../providers/SuggestionRegistryProvider';
 import { KeyValueField } from './KeyValueField';
 
-// Mock useSuggestions to control its output
-jest.mock('../hooks/suggestions', () => ({
-  useSuggestions: jest.fn(() => ({
-    suggestionsMenu: null,
-    openSuggestions: jest.fn(),
-  })),
-}));
+const StatefulSuggestionProvider = ({ children, getProviders }: { children: ReactNode; getProviders: jest.Mock }) => {
+  const [currentOpenMenu, setCurrentOpenMenu] = useState<string | null>(null);
+  return (
+    <SuggestionContext.Provider value={{ getProviders, currentOpenMenu, setCurrentOpenMenu }}>
+      {children}
+    </SuggestionContext.Provider>
+  );
+};
 
 describe('KeyValueField', () => {
+  const mockSuggestionProvider = {
+    id: 'test-provider',
+    appliesTo: jest.fn().mockReturnValue(true),
+    getSuggestions: jest.fn().mockResolvedValue([
+      { value: 'test-suggestion-1', description: 'First test suggestion' },
+      { value: 'test-suggestion-2', description: 'Second test suggestion' },
+    ]),
+  };
+
+  const getProvidersMock = jest.fn().mockReturnValue([mockSuggestionProvider]);
+
   const defaultProps = {
     id: 'test-id',
     name: 'test-name',
@@ -19,6 +33,10 @@ describe('KeyValueField', () => {
     onChange: jest.fn(),
     onFocus: jest.fn(),
     onBlur: jest.fn(),
+  };
+
+  const renderWithSuggestions = (children: React.ReactNode) => {
+    return render(<StatefulSuggestionProvider getProviders={getProvidersMock}>{children}</StatefulSuggestionProvider>);
   };
 
   beforeEach(() => {
@@ -75,15 +93,7 @@ describe('KeyValueField', () => {
   });
 
   it('shows suggestions when Ctrl+Space is pressed', async () => {
-    const SuggestionsMenu = () => <div data-testid="suggestions-menu">Suggestions</div>;
-    const { useSuggestions } = jest.requireMock('../hooks/suggestions');
-
-    useSuggestions.mockImplementation(() => ({
-      suggestionsMenu: <SuggestionsMenu />,
-      openSuggestions: jest.fn(),
-    }));
-
-    const { getByTestId } = render(<KeyValueField {...defaultProps} />);
+    const { getByTestId, getByRole } = renderWithSuggestions(<KeyValueField {...defaultProps} />);
     const input = getByTestId('keyvalue-input');
 
     await act(async () => {
@@ -94,5 +104,8 @@ describe('KeyValueField', () => {
     await waitFor(() => {
       expect(getByTestId('suggestions-menu')).toBeInTheDocument();
     });
+
+    expect(getByRole('menuitem', { name: 'test-suggestion-1' })).toBeInTheDocument();
+    expect(getByRole('menuitem', { name: 'test-suggestion-2' })).toBeInTheDocument();
   });
 });

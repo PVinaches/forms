@@ -7,13 +7,7 @@ import { SchemaProvider } from '../providers/SchemaProvider';
 import { ROOT_PATH } from '../utils';
 import { StringField } from './StringField';
 
-const StatefulSuggestionProvider = ({
-  children,
-  getProviders,
-}: {
-  children: ReactNode;
-  getProviders: jest.Mock;
-}) => {
+const StatefulSuggestionProvider = ({ children, getProviders }: { children: ReactNode; getProviders: jest.Mock }) => {
   const [currentOpenMenu, setCurrentOpenMenu] = useState<string | null>(null);
   return (
     <SuggestionContext.Provider value={{ getProviders, currentOpenMenu, setCurrentOpenMenu }}>
@@ -35,9 +29,7 @@ describe('StringField', () => {
   const getProvidersMock = jest.fn().mockReturnValue([mockSuggestionProvider]);
 
   const renderWithSuggestions = (children: React.ReactNode) => {
-    return render(
-      <StatefulSuggestionProvider getProviders={getProvidersMock}>{children}</StatefulSuggestionProvider>,
-    );
+    return render(<StatefulSuggestionProvider getProviders={getProvidersMock}>{children}</StatefulSuggestionProvider>);
   };
 
   beforeEach(() => {
