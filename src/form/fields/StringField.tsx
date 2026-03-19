@@ -85,7 +85,7 @@ export const StringField: FunctionComponent<StringFieldProps> = ({
     [onFieldChange],
   );
 
-  const suggestions = useSuggestions({
+  const { suggestionsMenu } = useSuggestions({
     propName,
     schema,
     inputRef,
@@ -134,7 +134,7 @@ export const StringField: FunctionComponent<StringFieldProps> = ({
           toggleRawValueWrap={toggleRawValueWrap}
         />
       </div>
-      {suggestions}
+      {suggestionsMenu}
       {additionalUtility}
     </FieldWrapper>
   );

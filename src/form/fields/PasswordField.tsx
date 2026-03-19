@@ -57,7 +57,7 @@ export const PasswordField: FunctionComponent<FieldProps> = ({ propName, require
     [onFieldChange],
   );
 
-  const suggestions = useSuggestions({
+  const { suggestionsMenu } = useSuggestions({
     propName,
     schema,
     inputRef,
@@ -102,7 +102,7 @@ export const PasswordField: FunctionComponent<FieldProps> = ({ propName, require
           toggleRawValueWrap={toggleRawValueWrap}
         />
       </div>
-      {suggestions}
+      {suggestionsMenu}
     </FieldWrapper>
   );
 };

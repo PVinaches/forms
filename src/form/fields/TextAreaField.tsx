@@ -40,7 +40,7 @@ export const TextAreaField: FunctionComponent<FieldProps> = ({ propName, require
     onChange(newValue);
   };
 
-  const suggestions = useSuggestions({
+  const { suggestionsMenu } = useSuggestions({
     propName,
     schema,
     inputRef: textAreaRef,
@@ -87,7 +87,7 @@ export const TextAreaField: FunctionComponent<FieldProps> = ({ propName, require
           toggleRawValueWrap={toggleRawValueWrap}
         />
       </div>
-      {suggestions}
+      {suggestionsMenu}
     </FieldWrapper>
   );
 };

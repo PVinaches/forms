@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -23,15 +24,29 @@ type UseSuggestionsProps = {
   value: string | number;
   setValue?: (value: string) => void;
 };
-export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: UseSuggestionsProps): ReactNode => {
-  const [isVisible, setIsVisible] = useState(false);
+
+type UseSuggestionsReturn = {
+  suggestionsMenu: ReactNode;
+  openSuggestions: () => void;
+};
+
+export const useSuggestions = ({
+  propName,
+  schema,
+  inputRef,
+  value,
+  setValue,
+}: UseSuggestionsProps): UseSuggestionsReturn => {
+  const menuId = `${propName}-${useId()}`;
   const [searchValue, setSearchValue] = useState('');
   const [groupedSuggestions, setGroupedSuggestions] = useState<GroupedSuggestions>({ root: [] });
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
   const firstElementRef = useRef<HTMLLIElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { getProviders } = useContext(SuggestionContext);
+  const { getProviders, currentOpenMenu, setCurrentOpenMenu } = useContext(SuggestionContext);
+
+  const isVisible = currentOpenMenu === menuId;
 
   const suggestionProviders: SuggestionProvider[] = useMemo(
     () => getProviders(propName, schema),
@@ -41,12 +56,12 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
   const onEscapeKey = useCallback(
     (event: React.KeyboardEvent | KeyboardEvent) => {
       event.preventDefault();
-      setIsVisible(false);
+      setCurrentOpenMenu(null);
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
     },
-    [inputRef],
+    [inputRef, setCurrentOpenMenu],
   );
 
   const handleInputKeyDown = useCallback(
@@ -56,29 +71,25 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
       if ((event.ctrlKey && event.code === 'Space') || (event.altKey && event.code === 'Escape')) {
         event.preventDefault();
         setSearchValue('');
-        setIsVisible(true);
-        requestAnimationFrame(() => {
-          firstElementRef.current?.focus();
-          firstElementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-        });
+        setCurrentOpenMenu(menuId);
       } else if (event.key === 'Escape') {
         onEscapeKey(event);
       }
     },
-    [onEscapeKey],
+    [onEscapeKey, setCurrentOpenMenu, menuId],
   );
 
   const getHandleOnClick = useCallback(
     (inputValue: string | number, suggestion: Suggestion) => () => {
       const { newValue, cursorPosition } = applySuggestion(suggestion, inputValue, inputRef.current?.selectionStart);
 
-      setIsVisible(false);
+      setCurrentOpenMenu(null);
       setValue?.(newValue);
 
       inputRef.current?.focus();
       inputRef.current?.setSelectionRange(cursorPosition, cursorPosition);
     },
-    [inputRef, setValue],
+    [inputRef, setValue, setCurrentOpenMenu],
   );
 
   const getHandleMenuKeyDown = useCallback(
@@ -140,33 +151,6 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
     };
   }, [suggestionProviders, value, propName, inputRef, isVisible, searchValue]);
 
-  /** Register keyboard bindings */
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input) return;
-
-    const handleFocus = () => {
-      input.addEventListener('keydown', handleInputKeyDown);
-    };
-    const handleBlur = () => {
-      input.removeEventListener('keydown', handleInputKeyDown);
-    };
-
-    input.addEventListener('focus', handleFocus);
-    input.addEventListener('blur', handleBlur);
-
-    // If already focused, register immediately
-    if (document.activeElement === input) {
-      handleFocus();
-    }
-
-    return () => {
-      input.removeEventListener('focus', handleFocus);
-      input.removeEventListener('blur', handleBlur);
-      input.removeEventListener('keydown', handleInputKeyDown);
-    };
-  }, [handleInputKeyDown, inputRef]);
-
   const focusOnSearchInput = useCallback(() => {
     searchInputRef.current?.focus();
   }, []);
@@ -194,6 +178,38 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
     [onEscapeKey],
   );
 
+  const openSuggestions = useCallback(() => {
+    setSearchValue('');
+    setCurrentOpenMenu((prev) => (prev === menuId ? null : menuId));
+  }, [menuId, setCurrentOpenMenu]);
+
+  /** Register keyboard bindings */
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const handleFocus = () => {
+      input.addEventListener('keydown', handleInputKeyDown);
+    };
+    const handleBlur = () => {
+      input.removeEventListener('keydown', handleInputKeyDown);
+    };
+
+    input.addEventListener('focus', handleFocus);
+    input.addEventListener('blur', handleBlur);
+
+    // If already focused, register immediately
+    if (document.activeElement === input) {
+      handleFocus();
+    }
+
+    return () => {
+      input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('blur', handleBlur);
+      input.removeEventListener('keydown', handleInputKeyDown);
+    };
+  }, [handleInputKeyDown, inputRef]);
+
   useEffect(() => {
     if (!isVisible || !inputRef.current) return;
 
@@ -220,9 +236,7 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
     });
   }, [isVisible, groupedSuggestions]);
 
-  if (!isVisible) return null;
-
-  return (
+  const suggestionsMenu = isVisible ? (
     <Layer level={1}>
       <div ref={menuRef} data-testid="suggestions-menu">
         <Menu
@@ -291,5 +305,10 @@ export const useSuggestions = ({ propName, schema, inputRef, value, setValue }: 
         </Menu>
       </div>
     </Layer>
-  );
+  ) : null;
+
+  return {
+    suggestionsMenu,
+    openSuggestions,
+  };
 };
