@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.8.0](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.7.2...@kaoto/forms@1.8.0) (2026-06-11)
+
+### Features
+
+* **libs:** Update patternfly to 6.5 ([a7c3d65](https://github.com/KaotoIO/forms/commit/a7c3d65637ae7571b90224845990d2bede37e1ad))
+
 ## [1.7.2](https://github.com/KaotoIO/forms/compare/@kaoto/forms@1.7.1...@kaoto/forms@1.7.2) (2026-03-29)
 
 **Note:** Version bump only for package @kaoto/forms
